@@ -148,7 +148,7 @@ function Login() {
                         disabled={loading}
 												className={classnames({
 													'intro-x login__input form-control py-3 px-4 block': true,
-													'intro-x login__input py-3 px-4 block border-danger': errors.email,
+													'intro-x login__input py-3 focus:ring-red-300 px-4 block border-danger': errors.email,
 												})}
 												placeholder='Email'
 											/>
@@ -166,7 +166,7 @@ function Login() {
                         disabled={loading}
 												className={classnames({
 													'intro-x login__input form-control py-3 px-4 block': true,
-													'intro-x login__input  py-3 px-4 block border-danger': errors.password,
+													'intro-x login__input focus:ring-red-300 py-3 px-4 block border-danger': errors.password,
 												})}
 												placeholder='Password'
 											/>

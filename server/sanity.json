@@ -1,11 +1,11 @@
 {
   "root": true,
-  "project": {
-    "name": "thinker-sanity"
-  },
   "api": {
     "projectId": "stjm45et",
     "dataset": "production"
+  },
+  "project": {
+    "name": "thinker-sanity"
   },
   "plugins": [
     "@sanity/base",
