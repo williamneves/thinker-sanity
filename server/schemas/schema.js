@@ -62,6 +62,13 @@ export default createSchema({
           hidden: true,
           // List options for the user's role
         },
+        {
+          title: "Created At",
+          name: "createdAt",
+          type: "datetime",
+          hidden: true,
+          initialValue: new Date(),
+        },
       ],
     },
   ]),

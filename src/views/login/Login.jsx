@@ -11,13 +11,15 @@ import * as yup from 'yup';
 import { LoadingIcon } from '@/base-components';
 import { useNavigate } from 'react-router-dom';
 import { auth, signInWithEmailAndPassword } from '../../lib/firebase';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { icon } from '@fortawesome/fontawesome-svg-core';
 
 // Yup schema for login form
 const schema = yup.object().shape({
-	email: yup.string().email().required('Email is required*'),
-	password: yup.string().required('Password is required*').min(6, 'Too short*'),
+	email: yup.string().email().required('Email is required'),
+	password: yup.string().required('Password is required').min(6, 'Too short'),
 });
 
 function Login() {
@@ -45,16 +47,17 @@ function Login() {
 	const onSubmit = async (data, e) => {
 		e.preventDefault();
 		setLoading(true);
-		const toastId = toast.loading('Checking...')
+		const toastId = toast.loading('Checking...');
 		try {
 			await signInWithEmailAndPassword(auth, data.email, data.password);
 			setLoading(false);
-			navigate( '/' );
+			navigate('/');
 			// Set the user to the store
 
 			// Toast the success
-			toast.success('Login successful!', {id: toastId});
-
+			toast.success('Login successful!', {
+				id: toastId,
+			});
 		} catch (error) {
 			console.log('error', error);
 
@@ -63,12 +66,15 @@ function Login() {
 			} else if (error.code === 'auth/wrong-password') {
 				setError('password', { type: 'firebase', message: 'Wrong Password!' });
 			}
-			toast.error('Something went wrong!', {id: toastId});
+
+			toast.error('Something went wrong!', {
+				id: toastId,
+			});
 			setLoading(false);
 		}
 	};
 
-	const onError = (errors,e) => {
+	const onError = (errors, e) => {
 		e.preventDefault();
 		toast.error('Something went wrong!');
 	};
@@ -103,8 +109,9 @@ function Login() {
 						{/* END: Login Info */}
 						{/* BEGIN: Login Form */}
 						<div className='h-screen xl:h-auto flex py-5 xl:py-0 my-10 xl:my-0'>
-							<div className='my-auto mx-auto xl:ml-20 bg-white dark:bg-darkmode-600 xl:bg-transparent px-5 sm:px-8 py-8 xl:p-0 rounded-md shadow-md xl:shadow-none w-full sm:w-3/4 lg:w-2/4 xl:w-auto'>
+							<div className='my-auto mx-auto xl:ml-20 bg-white dark:bg-darkmode-600 xl:bg-transparent px-5 sm:px-8 py-8 xl:p-0 rounded-md shadow-md xl:shadow-none w-full sm:w-3/4 lg:w-2/4 xl:w-auto ml-2'>
 								<h2 className='intro-x font-bold text-2xl xl:text-3xl text-center xl:text-left'>
+									<FontAwesomeIcon icon='fa-duotone fa-arrow-right-to-arc' className='mr-2' />
 									Sign In
 								</h2>
 								<div className='intro-x mt-2 text-slate-400 xl:hidden text-center'>
@@ -113,7 +120,7 @@ function Login() {
 								</div>
 								<form className='validate-form' onSubmit={handleSubmit(onSubmit, onError)}>
 									<div className='intro-x mt-8 flex flex-col gap-4'>
-										<div className='flex flex-col'>
+										<div className='flex flex-col relative'>
 											<input
 												{...register('email')}
 												onChange={() => clearErrors('email')}
@@ -129,7 +136,8 @@ function Login() {
 											/>
 											{errors.email && (
 												<div className='text-danger dark:text-red-300 z-30 absolute top-2.5 right-1 mt-1 text-end text-xs mr-2'>
-													{errors.email.message}
+													{errors.email.message}{' '}
+													<FontAwesomeIcon icon='fa-duotone fa-circle-exclamation' size='lg' />
 												</div>
 											)}
 										</div>
@@ -149,7 +157,8 @@ function Login() {
 											/>
 											{errors.password && (
 												<div className='text-danger dark:text-red-300 z-30 absolute top-2.5 right-1 mt-1 text-end text-xs mr-2'>
-													{errors.password.message}
+													{errors.password.message}{' '}
+													<FontAwesomeIcon icon='fa-duotone fa-circle-exclamation' size='lg' />
 												</div>
 											)}
 										</div>
@@ -164,14 +173,20 @@ function Login() {
 											className='btn btn-primary py-3 px-4 w-full xl:w-32 xl:mr-3 align-top'>
 											{loading ? (
 												<>
-													Loading 
+													Loading
 													<LoadingIcon
-														icon="ball-triangle"
-														color="#ffffff"
-														className="w-5 h-5 ml-2"></LoadingIcon>
+														icon='ball-triangle'
+														color='#ffffff'
+														className='w-5 h-5 ml-2'></LoadingIcon>
 												</>
 											) : (
-												'Sign In'
+												<div>
+													Sign In
+													<FontAwesomeIcon
+														icon='fa-duotone fa-arrow-right-to-arc'
+														className='ml-2'
+													/>
+												</div>
 											)}
 										</button>
 										<button
@@ -179,6 +194,10 @@ function Login() {
 											disabled={loading}
 											className='btn btn-outline-secondary py-3 px-4 w-full xl:w-32 mt-3 xl:mt-0 align-top'>
 											Register
+											<FontAwesomeIcon
+												icon='fa-duotone fa-arrow-up-right-from-square'
+												className='ml-2'
+											/>
 										</button>
 									</div>
 								</form>
