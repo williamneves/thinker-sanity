@@ -13,6 +13,13 @@ import {
 	deleteUser,
 	onAuthStateChanged,
 } from 'firebase/auth';
+import {
+  getStorage,
+  ref,
+  getDownloadURL,
+  uploadString,
+} from "firebase/storage";
+
 import { getAnalytics } from 'firebase/analytics';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -40,6 +47,9 @@ const auth = getAuth(app);
 const providerGoogle = new GoogleAuthProvider();
 const providerFacebook = new FacebookAuthProvider();
 
+// Firebase Storage
+const storage = getStorage(app);
+
 export {
 	app,
 	auth,
@@ -52,5 +62,10 @@ export {
 	signInWithEmailAndPassword,
 	getAdditionalUserInfo,
 	onAuthStateChanged,
-	signOut,
+  signOut,
+  getStorage,
+  ref,
+  getDownloadURL,
+  uploadString,
+  storage
 };

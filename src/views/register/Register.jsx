@@ -12,8 +12,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { auth, createUserWithEmailAndPassword } from '../../lib/firebase';
 import sanityClient from '../../../client.js';
 import toast from 'react-hot-toast';
-import { basename } from 'path';
-import { createReadStream } from 'fs';
+import { userDBAtom } from './../../atoms/userAtom';
+import { useRecoilState } from 'recoil';
 
 // Yup schema for login form
 const schema = yup.object().shape({
@@ -33,7 +33,8 @@ function Register() {
 		dom('body').removeClass('main').removeClass('error-page').addClass('login');
 	}, []);
 
-	const [loading, setLoading] = useState(false);
+	const [ loading, setLoading ] = useState( false );
+	const [userDB,setUserDB ] = useRecoilState(userDBAtom);
 	const navigate = useNavigate();
 	// Hook form
 	const {
@@ -82,32 +83,25 @@ function Register() {
 				authUID: newUser.user.uid,
 				name: data.name,
 				email: data.email,
-				// profileImage: profileImage(),
+				profileImage: profileImageURL(),
+				role: 'user',
 			};
 
 			// Create the userProfile in the database
-			await sanityClient
-				.create(userProfile)
-				.then((res) => {
-					console.log('res', res);
-				})
-				.catch((err) => {
-					console.log(err);
-				});
-
-			const filePath = profileImageURL();
-			await sanityClient.assets
-				.upload('image', createReadStream(filePath), {
-					filename: basename(filePath),
-				})
-				.then((imageAsset) => {
-					console.log('got imageAsset', imageAsset);
-				});
+			const userProfileDB = await sanityClient.create( userProfile )
+			
+			// Set the userProfile in the localStorage
+			localStorage.setItem( 'userProfile', JSON.stringify( userProfileDB ) );
+			
+			// Set the userProfile in the global state
+			setUserDB( userProfileDB );
 
 			// Set loading to false to unblock the form
 			setLoading(false);
 			// Remove the toast
-			toast.success('User created successfully', { id: toastId });
+			toast.success( 'User created successfully', { id: toastId } );
+			// Navigate to the home page
+			navigate('/');
 		} catch (error) {
 			console.log('error', error);
 			// Set loading to false to unblock the form

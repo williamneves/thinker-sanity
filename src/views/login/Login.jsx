@@ -14,7 +14,9 @@ import { auth, signInWithEmailAndPassword } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { icon } from '@fortawesome/fontawesome-svg-core';
+import sanityClient from '../../../client';
+import { userDBAtom } from '../../atoms/userAtom';
+import { useRecoilState } from 'recoil';
 
 // Yup schema for login form
 const schema = yup.object().shape({
@@ -42,6 +44,7 @@ function Login() {
 	}, []);
 
 	const navigate = useNavigate();
+	const [userDB, setUserDB] = useRecoilState(userDBAtom);
 
 	const [loading, setLoading] = useState(false);
 	const onSubmit = async (data, e) => {
@@ -49,15 +52,29 @@ function Login() {
 		setLoading(true);
 		const toastId = toast.loading('Checking...');
 		try {
-			await signInWithEmailAndPassword(auth, data.email, data.password);
+			const authUser = await signInWithEmailAndPassword(auth, data.email, data.password);
 			setLoading(false);
-			navigate('/');
 			// Set the user to the store
+
+			// Get the user from the database
+			const q = `
+      *[_type == 'userProfile' && authUID==$id]{
+				...,
+			}
+      `;
+			const userInDB = await sanityClient.fetch(q, { id: authUser.user.uid });
+
+			// Set user to local storage
+			localStorage.setItem('userProfile', JSON.stringify(userInDB[0]));
+
+			// Set user to global state
+			setUserDB(userInDB[0]);
 
 			// Toast the success
 			toast.success('Login successful!', {
 				id: toastId,
 			});
+			navigate('/');
 		} catch (error) {
 			console.log('error', error);
 
