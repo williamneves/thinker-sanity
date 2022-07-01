@@ -72,7 +72,8 @@
 @import "@left4code/tw-starter/dist/css/_form-select.css";
 @import "@left4code/tw-starter/dist/css/_image-fit.css";
 @import "@left4code/tw-starter/dist/css/_input-group.css";
-@import "@left4code/tw-starter/dist/css/_intro.css";
+/* @import "@left4code/tw-starter/dist/css/_intro.css"; */
+@import './components/_intro.css';
 @import "@left4code/tw-starter/dist/css/_modal.css";
 @import "@left4code/tw-starter/dist/css/_pagination.css";
 @import "@left4code/tw-starter/dist/css/_progress.css";

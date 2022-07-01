@@ -47,20 +47,20 @@
       > li:nth-child($i) {
         &.side-nav__devider {
           @apply opacity-0;
-          animation: 0.4s intro-devider-animation ease-in-out 0.33333s;
+          animation: 0.15s intro-devider-animation ease-in-out 0.11111s;
           animation-fill-mode: forwards;
-          animation-delay: calc($i * 0.1s);
+          animation-delay: calc($i * 0.0333s);
         }
         & > a {
           &:not(.side-menu--active) {
             @apply opacity-0;
             transform: translateX(50px);
-            animation: 0.4s intro-menu-animation ease-in-out 0.33333s;
+            animation: 0.15s intro-menu-animation ease-in-out 0.11111s;
             animation-fill-mode: forwards;
-            animation-delay: calc($i * 0.1s);
+            animation-delay: calc($i * 0.0333s);
           }
           &.side-menu--active {
-            animation: 0.4s intro-active-menu-animation ease-in-out 0.33333s;
+            animation: 0.15s intro-active-menu-animation ease-in-out 0.11111s;
             animation-fill-mode: forwards;
           }
         }
@@ -72,9 +72,9 @@
           & > a {
             @apply opacity-0;
             transform: translateX(50px);
-            animation: 0.2s intro-submenu-animation ease-in-out 0.33333s;
+            animation: 0.15s intro-submenu-animation ease-in-out 0.11111s;
             animation-fill-mode: forwards;
-            animation-delay: calc($i * 0.1s);
+            animation-delay: calc($i * 0.0333s);
           }
         }
       }

@@ -35,11 +35,11 @@ function Main() {
         {/* BEGIN: Side Menu */}
         <nav className="side-nav">
           <Link
-            to="/side-menu/dashboard-overview-1"
+            to="/"
             className="intro-x flex items-center pl-5 pt-4 mt-3"
           >
             <img
-              alt="Tinker Tailwind HTML Admin Template"
+              alt="FrameWork"
               className="w-6"
               src={logoUrl}
             />
