@@ -34,6 +34,12 @@ export default {
 			type: 'string',
 		},
 		{
+			title: 'Profile Image 2',
+			name: 'profileImage2',
+			type: 'image',
+		},
+
+		{
 			title: 'Role',
 			name: 'role',
       type: 'string',

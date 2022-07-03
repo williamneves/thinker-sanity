@@ -1,38 +1,27 @@
 import React, { useState, useEffect } from "react";
 import sanityClient from "../../../client.js";
+import { useLocation } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
+import { breadcrumbAtom } from '../../atoms/userAtom';
 
 function Main() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
+  const [breadcrumb, setBreadcrumb] = useRecoilState(breadcrumbAtom);
+	const location = useLocation();
+  
   useEffect(() => {
-    sanityClient
-      .fetch(
-        `
-      *[_type == 'userProfile']{
-  ...,
-  }
-      `
-      )
-      .then((res) => {
-        setData(res);
-        setLoading(false);
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+		setBreadcrumb('Home');
+	}, []);
+  
   return (
-    <>
-      <div className="intro-y flex items-center mt-8">
-        <h2 className="text-lg font-medium mr-auto">Page 1</h2>
-      </div>
-      {/* BEGIN: Page Layout */}
-      <div className="intro-y box p-5 mt-5">Name: {data[0]?.name}</div>
-      {/* END: Page Layout */}
-    </>
-  );
+		<>
+			<div className='intro-y flex items-center mt-8'>
+				<h2 className='text-lg font-medium mr-auto'>Page 1</h2>
+			</div>
+			{/* BEGIN: Page Layout */}
+			<div className='intro-y box p-5 mt-5'>Name: </div>
+			{/* END: Page Layout */}
+		</>
+	);
 }
 
 export default Main;

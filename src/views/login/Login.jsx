@@ -1,16 +1,21 @@
 import DarkModeSwitcher from "@/components/dark-mode-switcher/Main";
 import dom from "@left4code/tw-starter/dist/js/dom";
 import logoUrl from "@/assets/images/logo.svg";
-import illustrationUrl from "@/assets/images/illustration.svg";
-import Toastify from 'toastify-js';
+import illustrationUrl from '@/assets/images/illustration.svg';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import classnames from 'classnames';
 import * as yup from 'yup';
-import { LoadingIcon } from '@/base-components';
+import {
+	LoadingIcon,
+	Modal,
+	ModalHeader,
+	ModalBody,
+	ModalFooter,
+} from '@/base-components';
 import { useNavigate } from 'react-router-dom';
-import { auth, signInWithEmailAndPassword } from '../../lib/firebase';
+import { auth, signInWithEmailAndPassword, sendPasswordResetEmail } from '../../lib/firebase';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -19,13 +24,29 @@ import { userDBAtom } from '../../atoms/userAtom';
 import { useRecoilState } from 'recoil';
 
 // Yup schema for login form
-const schema = yup.object().shape({
+const loginForm = yup.object().shape({
 	email: yup.string().email().required('Email is required'),
 	password: yup.string().required('Password is required').min(6, 'Too short'),
+});
+// Yup schema for reset password form
+const resetPasswordForm = yup.object().shape({
+	emailReset: yup.string().email().required('Email is required'),
 });
 
 function Login() {
 	// Hook form
+	const {
+		register: registerLoginForm,
+		handleSubmit: handleSubmitLoginForm,
+		formState: { errors: errorsLoginForm },
+		clearErrors: clearErrorsLoginForm,
+		setError: setErrorLoginForm,
+		resetField: resetFieldLoginForm,
+	} = useForm({
+		resolver: yupResolver(resetPasswordForm),
+		mode: 'onSubmit',
+		reValidateMode: 'onSubmit',
+	});
 	const {
 		register,
 		handleSubmit,
@@ -33,7 +54,7 @@ function Login() {
 		clearErrors,
 		setError,
 	} = useForm({
-		resolver: yupResolver(schema),
+		resolver: yupResolver(loginForm),
 		mode: 'onSubmit',
 		reValidateMode: 'onSubmit',
 	});
@@ -45,6 +66,8 @@ function Login() {
 
 	const navigate = useNavigate();
 	const [userDB, setUserDB] = useRecoilState(userDBAtom);
+	const [forgotPasswordModal, setForgotPasswordModal] = useState(false);
+	const [loadingReset, setLoadingReset] = useState(false);
 
 	const [loading, setLoading] = useState(false);
 	const onSubmit = async (data, e) => {
@@ -53,9 +76,6 @@ function Login() {
 		const toastId = toast.loading('Checking...');
 		try {
 			const authUser = await signInWithEmailAndPassword(auth, data.email, data.password);
-			setLoading(false);
-			// Set the user to the store
-
 			// Get the user from the database
 			const q = `
       *[_type == 'userProfile' && authUID==$id]{
@@ -63,10 +83,8 @@ function Login() {
 			}
       `;
 			const userInDB = await sanityClient.fetch(q, { id: authUser.user.uid });
-
 			// Set user to local storage
 			localStorage.setItem('userProfile', JSON.stringify(userInDB[0]));
-
 			// Set user to global state
 			setUserDB(userInDB[0]);
 
@@ -74,6 +92,7 @@ function Login() {
 			toast.success('Login successful!', {
 				id: toastId,
 			});
+			setLoading(false);
 			navigate('/');
 		} catch (error) {
 			console.log('error', error);
@@ -91,9 +110,39 @@ function Login() {
 		}
 	};
 
+	const onSubmitP = async (data, e) => {
+		e.preventDefault();
+		setLoadingReset(true);
+		sendPasswordResetEmail(auth, data.emailReset)
+			.then(() => {
+				// Password reset email sent!
+				// ..
+				toast.success('Password reset email sent!');
+				setForgotPasswordModal(false);
+				setLoadingReset(false);
+				resetFieldLoginForm('emailReset');
+			})
+			.catch((error) => {
+				const errorCode = error.code;
+				const errorMessage = error.message;
+				console.log(errorCode);
+				if (errorCode === 'auth/missing-email') {
+					setErrorLoginForm('emailReset', { type: 'firebase', message: 'Email not found!' });
+				} else {
+					setErrorLoginForm('emailReset', { type: 'firebase', message: errorMessage });
+				}
+				// ..
+			});
+	};
+
 	const onError = (errors, e) => {
 		e.preventDefault();
+		console.log('errors', errors);
 		toast.error('Something went wrong!');
+	};
+	const onErrorP = (errors, e) => {
+		e.preventDefault();
+		console.log('errors', errors);
 	};
 
 	return (
@@ -127,7 +176,7 @@ function Login() {
 						{/* BEGIN: Login Form */}
 						<div className='h-screen xl:h-auto flex py-5 xl:py-0 my-10 xl:my-0'>
 							<div className='my-auto mx-auto xl:ml-20 bg-white dark:bg-darkmode-600 xl:bg-transparent px-5 sm:px-8 py-8 xl:p-0 rounded-md shadow-md xl:shadow-none w-full sm:w-3/4 lg:w-2/4 xl:w-auto ml-2'>
-								<h2 className='intro-x font-bold text-2xl xl:text-3xl text-center xl:text-left'>
+								<h2 className='intro-x font-bold text-2xl xl:text-3xl text-center xl:text-left ml-2'>
 									<FontAwesomeIcon icon='fa-duotone fa-arrow-right-to-arc' className='mr-2' />
 									Sign In
 								</h2>
@@ -135,7 +184,10 @@ function Login() {
 									A few more clicks to sign in to your account. Manage all your e-commerce accounts
 									in one place
 								</div>
-								<form className='validate-form' onSubmit={handleSubmit(onSubmit, onError)}>
+								<form
+									className='validate-form'
+									onSubmit={handleSubmit(onSubmit, onError)}
+									id='LoginForm'>
 									<div className='intro-x mt-8 flex flex-col gap-4'>
 										<div className='flex flex-col relative'>
 											<input
@@ -180,11 +232,19 @@ function Login() {
 											)}
 										</div>
 									</div>
-									<div className='intro-x flex text-slate-600 dark:text-slate-500 text-xs sm:text-sm mt-4'>
-										<Link to='#'>Forgot Password?</Link>
+									{/* BEGIN: Modal Toggle */}
+									<div className='intro-x flex text-slate-600 dark:text-slate-500 text-xs sm:text-sm mt-4 cursor-pointer justify-end mr-2'>
+										<span
+											onClick={() => {
+												setForgotPasswordModal(true);
+											}}>
+											Forgot Password?
+										</span>
 									</div>
+									{/* END: Modal Toggle */}
 									<div className='intro-x mt-5 xl:mt-8 text-center xl:text-left'>
 										<button
+											form="LoginForm"
 											type='submit'
 											disabled={loading}
 											className='btn btn-primary py-3 px-4 w-full xl:w-32 xl:mr-3 align-top'>
@@ -234,6 +294,58 @@ function Login() {
 					</div>
 				</div>
 			</div>
+			{/* BEGIN: Modal Content */}
+			<Modal
+				show={forgotPasswordModal}
+				onHidden={() => {
+					setForgotPasswordModal(false);
+				}}>
+				<ModalHeader>
+					<h2 className='font-medium text-base mr-auto'>Reset Password Email Link</h2>
+				</ModalHeader>
+				<ModalBody className='flex flex-col gap-2'>
+					<label className='text-slate-600 dark:text-slate-200'>Type your email:</label>
+					<form
+						className='flex flex-col relative'
+						id='resetPassword'
+						onSubmit={handleSubmitLoginForm(onSubmitP,onErrorP)}>
+						<input
+							{...registerLoginForm('emailReset')}
+							onChange={() => clearErrorsLoginForm('emailReset')}
+							type='email'
+							style={{ zIndex: 0 }}
+							disabled={loading}
+							className={classnames({
+								'intro-x login__input form-control py-3 px-4 block': true,
+								'intro-x login__input py-3 border-0 ring-2 ring-red-300 focus:ring-red-400 px-4 block border-danger transition-all ease-in-out duration-150':
+									errorsLoginForm.emailReset,
+							})}
+							placeholder='Email'
+						/>
+						{errorsLoginForm.emailReset && (
+							<div className='text-danger dark:text-red-300 z-30 absolute top-2.5 right-1 mt-1 text-end text-xs mr-2'>
+								{errorsLoginForm.emailReset.message}{' '}
+								<FontAwesomeIcon icon='fa-duotone fa-circle-exclamation' size='lg' />
+							</div>
+						)}
+					</form>
+				</ModalBody>
+				<ModalFooter>
+					<button
+						disabled={loadingReset}
+						type='button'
+						onClick={() => {
+							setForgotPasswordModal(false);
+						}}
+						className='btn btn-outline-secondary w-20 mr-1'>
+						Cancel
+					</button>
+					<button type='submit' form='resetPassword' className='btn btn-primary w-36'>
+						Send Email Link
+					</button>
+				</ModalFooter>
+			</Modal>
+			{/* END: Modal Content */}
 		</>
 	);
 }

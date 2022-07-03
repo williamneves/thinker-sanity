@@ -14,6 +14,11 @@ const sideMenu = atom({
         pathname: "/page-2",
         title: "Page 2",
       },
+      {
+        icon: "User",
+        pathname: "/update-profile",
+        title: "Update Profile",
+      },
     ],
   },
 });

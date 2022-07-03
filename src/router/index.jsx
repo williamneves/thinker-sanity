@@ -1,9 +1,9 @@
 import { useRoutes } from "react-router-dom";
-import SideMenu from '../layouts/side-menu/Main';
+import SideMenu from '../layouts/side-menu/SideMenu';
 import Page1 from '../views/page-1/Main';
 import Page2 from '../views/page-2/Main';
 import { ProtectedRoute } from './ProtectedRoute';
-import { Login, Validation, Register } from '../views/';
+import { Login, Validation, Register,UpdateProfile } from '../views/';
 
 function Router() {
   const routes = [
@@ -22,6 +22,10 @@ function Router() {
 				{
 					path: 'page-2',
 					element: <Page2 />,
+				},
+				{
+					path: 'update-profile',
+					element: <UpdateProfile />,
 				},
 				{
 					path: 'validation',

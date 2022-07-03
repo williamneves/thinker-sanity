@@ -1,48 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
-  Lucide,
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownContent,
-  DropdownItem,
-  DropdownHeader,
-  DropdownDivider,
-} from "@/base-components";
-import { faker as $f } from "@/utils";
-import * as $_ from "lodash";
-import classnames from "classnames";
+	Lucide,
+	Dropdown,
+	DropdownToggle,
+	DropdownMenu,
+	DropdownContent,
+	DropdownItem,
+	DropdownHeader,
+	DropdownDivider,
+} from '@/base-components';
+// import { faker as $f } from '@/utils';
+// import * as $_ from 'lodash';
+// import classnames from 'classnames';
+import { userDBAtom, breadcrumbAtom } from '../../atoms/userAtom';
 
-function Main(props) {
-  const [searchDropdown, setSearchDropdown] = useState(false);
-  const showSearchDropdown = () => {
-    setSearchDropdown(true);
-  };
-  const hideSearchDropdown = () => {
-    setSearchDropdown(false);
-  };
+import { useRecoilState } from 'recoil';
 
-  return (
-    <>
-      {/* BEGIN: Top Bar */}
-      <div className="top-bar">
-        {/* BEGIN: Breadcrumb */}
-        <nav
-          aria-label="breadcrumb"
-          className="-intro-x mr-auto hidden sm:flex"
-        >
-          <ol className="breadcrumb">
-            <li className="breadcrumb-item">
-              <a href="#">Application</a>
-            </li>
-            <li className="breadcrumb-item active" aria-current="page">
-              Dashboard
-            </li>
-          </ol>
-        </nav>
-        {/* END: Breadcrumb */}
-        {/* BEGIN: Search */}
-        <div className="intro-x relative mr-3 sm:mr-6">
+function TopBar(props) {
+	const [searchDropdown, setSearchDropdown] = useState(false);
+	const [userDB, setUserDB] = useRecoilState(userDBAtom);
+	const [breadcrumb, setBreadcrumb] = useRecoilState(breadcrumbAtom);
+	const location = useLocation();
+
+	useEffect(() => {
+		if (location.pathname === '/') {
+			setBreadcrumb('Home');
+		} else {
+			let path = location.pathname.split('/')[1];
+			path = path.split('-');
+			for (let i = 0; i < path.length; i++) {
+				// check if the first letter is a number
+				if (isNaN(path[i])) {
+					let pathList = path[i].split('');
+					pathList[0] = pathList[0].toUpperCase();
+					path[i] = pathList.join('');
+				}
+				setBreadcrumb(path.join(' '));
+			}
+		}
+	}, [location.pathname]);
+
+	const showSearchDropdown = () => {
+		setSearchDropdown(true);
+	};
+	const hideSearchDropdown = () => {
+		setSearchDropdown(false);
+	};
+
+	return (
+		<>
+			{/* BEGIN: Top Bar */}
+			<div className='top-bar'>
+				{/* BEGIN: Breadcrumb */}
+				<nav aria-label='breadcrumb' className='-intro-x mr-auto hidden sm:flex'>
+					<ol className='breadcrumb'>
+						<li className='breadcrumb-item'>
+							<Link to='/'>Application</Link>
+						</li>
+						<li className='breadcrumb-item active' aria-current='page'>
+							{breadcrumb}
+						</li>
+					</ol>
+				</nav>
+				{/* END: Breadcrumb */}
+				{/* BEGIN: Search */}
+				{/* <div className="intro-x relative mr-3 sm:mr-6">
           <div className="search hidden sm:block">
             <input
               type="text"
@@ -126,10 +149,10 @@ function Main(props) {
               ))}
             </div>
           </div>
-        </div>
-        {/* END: Search  */}
-        {/* BEGIN: Notifications */}
-        <Dropdown className="intro-x mr-auto sm:mr-6">
+        </div> */}
+				{/* END: Search  */}
+				{/* BEGIN: Notifications */}
+				{/* <Dropdown className="intro-x mr-auto sm:mr-6">
           <DropdownToggle
             tag="div"
             role="button"
@@ -176,53 +199,49 @@ function Main(props) {
               ))}
             </DropdownContent>
           </DropdownMenu>
-        </Dropdown>
-        {/* END: Notifications  */}
-        {/* BEGIN: Account Menu */}
-        <Dropdown className="intro-x w-8 h-8">
-          <DropdownToggle
-            tag="div"
-            role="button"
-            className="w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in"
-          >
-            <img
-              alt="Midone Tailwind HTML Admin Template"
-              src={$f()[9].photos[0]}
-            />
-          </DropdownToggle>
-          <DropdownMenu className="w-56">
-            <DropdownContent className="bg-primary text-white">
-              <DropdownHeader tag="div" className="!font-normal">
-                <div className="font-medium">{$f()[0].users[0].name}</div>
-                <div className="text-xs text-white/70 mt-0.5 dark:text-slate-500">
-                  {$f()[0].jobs[0]}
-                </div>
-              </DropdownHeader>
-              <DropdownDivider className="border-white/[0.08]" />
-              <DropdownItem className="hover:bg-white/5">
-                <Lucide icon="User" className="w-4 h-4 mr-2" /> Profile
-              </DropdownItem>
-              <DropdownItem className="hover:bg-white/5">
-                <Lucide icon="Edit" className="w-4 h-4 mr-2" /> Add Account
-              </DropdownItem>
-              <DropdownItem className="hover:bg-white/5">
-                <Lucide icon="Lock" className="w-4 h-4 mr-2" /> Reset Password
-              </DropdownItem>
-              <DropdownItem className="hover:bg-white/5">
-                <Lucide icon="HelpCircle" className="w-4 h-4 mr-2" /> Help
-              </DropdownItem>
-              <DropdownDivider className="border-white/[0.08]" />
-              <DropdownItem className="hover:bg-white/5">
-                <Lucide icon="ToggleRight" className="w-4 h-4 mr-2" /> Logout
-              </DropdownItem>
-            </DropdownContent>
-          </DropdownMenu>
-        </Dropdown>
-        {/* END: Account Menu */}
-      </div>
-      {/* END: Top Bar */}
-    </>
-  );
+        </Dropdown> */}
+				{/* END: Notifications  */}
+				{/* BEGIN: Account Menu */}
+				<Dropdown className='intro-x w-8 h-8'>
+					<DropdownToggle
+						tag='div'
+						role='button'
+						className='w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in'>
+						<img alt={`${userDB?.name} Avatar`} src={userDB?.profileImage} />
+					</DropdownToggle>
+					<DropdownMenu className='w-56'>
+						<DropdownContent className='bg-primary text-white'>
+							<DropdownHeader tag='div' className='!font-normal'>
+								<div className='font-medium'>{userDB?.name}</div>
+								<div className='text-xs text-white/70 mt-0.5 dark:text-slate-500'>
+									{userDB?.jobTitle || 'User'}
+								</div>
+							</DropdownHeader>
+							<DropdownDivider className='border-white/[0.08]' />
+							<DropdownItem className='hover:bg-white/5'>
+								<Lucide icon='User' className='w-4 h-4 mr-2' /> Profile
+							</DropdownItem>
+							<DropdownItem className='hover:bg-white/5'>
+								<Lucide icon='Edit' className='w-4 h-4 mr-2' /> Add Account
+							</DropdownItem>
+							<DropdownItem className='hover:bg-white/5'>
+								<Lucide icon='Lock' className='w-4 h-4 mr-2' /> Reset Password
+							</DropdownItem>
+							<DropdownItem className='hover:bg-white/5'>
+								<Lucide icon='HelpCircle' className='w-4 h-4 mr-2' /> Help
+							</DropdownItem>
+							<DropdownDivider className='border-white/[0.08]' />
+							<DropdownItem className='hover:bg-white/5'>
+								<Lucide icon='ToggleRight' className='w-4 h-4 mr-2' /> Logout
+							</DropdownItem>
+						</DropdownContent>
+					</DropdownMenu>
+				</Dropdown>
+				{/* END: Account Menu */}
+			</div>
+			{/* END: Top Bar */}
+		</>
+	);
 }
 
-export default Main;
+export default TopBar;
